@@ -57,56 +57,26 @@ provider:
 #     - ./bin/**
 
 # package:
-#   exclude:
-#     - ./**
-
-# functions:
-#   hello:
-#     handler: bin/hello
-#     events:
-#       - httpApi:
-#           path: /hello
-#           method: get
-#   world:
-#     handler: bin/world
-#     events:
-#       - httpApi:
-#           path: /world
-#           method: get
+#   include:
+#     - ./bootstrap
+#     - ./bootstrap.zip
 
 functions:
   api:
     handler: bootstrap
     events:
       - http:
-          path: /zombie-boss/count/set/{count}
+          path: /count/set/{count}
           method: post
       - http:
-          path: /zombie-boss/count/add
+          path: /count/add
           method: post
       - http:
-          path: /zombie-boss/count
+          path: /count
           method: get
-
-# functions:
-#   setCount:
-#     handler: bin/setCount
-#     events:
-#       - http:
-#           path: zombie-boss/count/set/{count}
-#           method: post
-#   addCount:
-#     handler: bin/addCount
-#     events:
-#       - http:
-#           path: zombie-boss/count/add
-#           method: post
-#   getCount:
-#     handler: bin/getCount
-#     events:
-#       - http:
-#           path: zombie-boss/count
-#           method: get
+      - http:
+          path: /pre-register/{email}
+          method: post
 
 resources:
   Resources:
@@ -119,6 +89,18 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    ZombieBossPreRegisterTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: zombie_boss_pre_register
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 

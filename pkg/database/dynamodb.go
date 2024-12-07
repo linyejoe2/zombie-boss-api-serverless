@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,11 +18,33 @@ func init() {
 	svc = dynamodb.New(sess, aws.NewConfig().WithRegion("ap-northeast-2"))
 }
 
+func PreRegister(email string) error {
+	timestamp := time.Now().Unix()
+
+	input := &dynamodb.PutItemInput{
+		TableName: aws.String("zombie_boss_pre_register"),
+		Item: map[string]*dynamodb.AttributeValue{
+			"email": {
+				S: aws.String(email),
+			},
+			"timestamp": {
+				N: aws.String(fmt.Sprintf("%d", timestamp)),
+			},
+		},
+	}
+
+	_, err := svc.PutItem(input)
+	if err != nil {
+		return fmt.Errorf("failed to pre-register: %v", err)
+	}
+	return nil
+}
+
 func SetCount(count string) error {
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String("zombie_boss"),
 		Item: map[string]*dynamodb.AttributeValue{
-			"ID": {
+			"id": {
 				S: aws.String("zombieBossCount"),
 			},
 			"Count": {
@@ -53,7 +76,7 @@ func GetCount() (int, error) {
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String("zombie_boss"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"ID": {
+			"id": {
 				S: aws.String("zombieBossCount"),
 			},
 		},

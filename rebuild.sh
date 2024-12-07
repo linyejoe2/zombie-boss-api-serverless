@@ -1,1 +1,1 @@
-GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bootstrap lambda/main.go && "C:\Program Files\7-Zip\7z.exe" a bootstrap.zip bootstrap
+GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bootstrap lambdas/main.go && "C:\Program Files\7-Zip\7z.exe" a bootstrap.zip bootstrap
