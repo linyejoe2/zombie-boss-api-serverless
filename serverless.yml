@@ -64,26 +64,45 @@ provider:
 functions:
   api:
     handler: bootstrap
+    environment:
+      ZOMBIE_BOSS_PRE_REGISTER_TABLE: zombie_boss_pre_register_${sls:stage}
+      ZOMBIE_BOSS_TABLE: zombie_boss_${sls:stage}
     events:
-      - http:
-          path: /count/set/{count}
+      # - http:
+      #     path: /*
+      #     method: options
+      - httpApi:
+          path: /ping
+          method: get
+          cors: true
+      - httpApi:
+          path: /count/{count}
           method: post
-      - http:
-          path: /count/add
-          method: post
-      - http:
+          cors: true
+      - httpApi:
           path: /count
           method: get
-      - http:
+          cors: true
+      - httpApi:
+          path: /count
+          method: put
+          cors: true
+      - httpApi:
           path: /pre-register/{email}
           method: post
+          cors: true
+      - httpApi:
+          path: /pre-register
+          method: get
+          cors: true
 
 resources:
   Resources:
     ZombieBossTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain  # 保持表不被刪除
       Properties:
-        TableName: zombie_boss
+        TableName: zombie_boss_${sls:stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -94,8 +113,9 @@ resources:
 
     ZombieBossPreRegisterTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain  # 保持表不被刪除
       Properties:
-        TableName: zombie_boss_pre_register
+        TableName: zombie_boss_pre_register_${sls:stage}
         AttributeDefinitions:
           - AttributeName: email
             AttributeType: S

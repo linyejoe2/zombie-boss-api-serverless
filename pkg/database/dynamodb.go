@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,7 +23,7 @@ func PreRegister(email string) error {
 	timestamp := time.Now().Unix()
 
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("zombie_boss_pre_register"),
+		TableName: aws.String(os.Getenv("ZOMBIE_BOSS_PRE_REGISTER_TABLE")),
 		Item: map[string]*dynamodb.AttributeValue{
 			"email": {
 				S: aws.String(email),
@@ -42,7 +43,7 @@ func PreRegister(email string) error {
 
 func SetCount(count string) error {
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("zombie_boss"),
+		TableName: aws.String(os.Getenv("ZOMBIE_BOSS_TABLE")),
 		Item: map[string]*dynamodb.AttributeValue{
 			"id": {
 				S: aws.String("zombieBossCount"),
@@ -72,9 +73,35 @@ func AddCount() error {
 	return SetCount(fmt.Sprintf("%d", newCount))
 }
 
+func GetPreRegister() ([]string, error) {
+	// 準備 ScanInput，用來掃描表格中的資料
+	input := &dynamodb.ScanInput{
+		TableName:            aws.String(os.Getenv("ZOMBIE_BOSS_PRE_REGISTER_TABLE")),
+		ProjectionExpression: aws.String("email"), // 只取 email 欄位
+	}
+
+	// 執行 Scan 操作
+	result, err := svc.Scan(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pre-register list: %v", err)
+	}
+
+	// 準備儲存 email 的 slice
+	emails := []string{}
+
+	// 將掃描到的每一筆資料中的 email 取出並放入 emails slice 中
+	for _, item := range result.Items {
+		if emailAttr, ok := item["email"]; ok {
+			emails = append(emails, *emailAttr.S)
+		}
+	}
+
+	return emails, nil
+}
+
 func GetCount() (int, error) {
 	input := &dynamodb.GetItemInput{
-		TableName: aws.String("zombie_boss"),
+		TableName: aws.String(os.Getenv("ZOMBIE_BOSS_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
 				S: aws.String("zombieBossCount"),
