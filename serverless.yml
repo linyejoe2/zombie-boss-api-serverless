@@ -24,6 +24,7 @@ provider:
   name: aws
   runtime: provided.al2
   region: ap-northeast-2
+  profile: developer
 
 # you can overwrite defaults here
 #  stage: dev
@@ -74,27 +75,27 @@ functions:
       - httpApi:
           path: /ping
           method: get
-          cors: true
       - httpApi:
           path: /count/{count}
           method: post
-          cors: true
       - httpApi:
           path: /count
           method: get
-          cors: true
       - httpApi:
           path: /count
           method: put
-          cors: true
       - httpApi:
           path: /pre-register/{email}
           method: post
-          cors: true
       - httpApi:
           path: /pre-register
           method: get
-          cors: true
+      - httpApi:
+          path: /register/{gameId}
+          method: post
+      - httpApi:
+          path: /register
+          method: get
 
 resources:
   Resources:

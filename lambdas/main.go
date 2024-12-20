@@ -113,6 +113,37 @@ func init() {
 		// ctx.JSON(200, utils.JSONResponse(false, 200, "Pre register list get successfully.", emails))
 	})
 
+	r.GET("/register", func(c *gin.Context) {
+		registerList, err := database.GetRegister()
+		if err != nil {
+			utils.JSONErrorResponse(c, 500, "getting register list", err)
+			return
+		}
+
+		utils.JSONSuccessResponse(c, "getting pre-register list", registerList)
+	})
+
+	r.POST("/register/:gameId", func(ctx *gin.Context) {
+		gameId := ctx.Param("gameId")
+		gameIdRegex, gameIdErr := regexp.Compile(`^\d*$`)
+		if gameIdErr != nil {
+			utils.JSONErrorResponse(ctx, 500, "inserting register gameId", gameIdErr)
+			return
+		}
+		if !gameIdRegex.MatchString(gameId) {
+			utils.JSONErrorResponse(ctx, 400, "inserting register gameId", errors.New("Unsupported parameters."))
+			return
+		}
+
+		err := database.Register(gameId)
+		if err != nil {
+			utils.JSONErrorResponse(ctx, 500, "inserting register gameId", err)
+			return
+		}
+
+		utils.JSONSuccessResponse(ctx, "inserting register gameId", nil)
+	})
+
 	// 包裝 Gin 以供 Lambda 使用
 	ginLambda = ginadapter.NewV2(r)
 }
